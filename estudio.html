@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Estudio de Grabación PISO3 | Casavia</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-950 text-zinc-100 font-sans antialiased">
+
+  <!-- Barra de navegación -->
+  <nav class="border-b border-zinc-800/80 bg-zinc-950/90 sticky top-0 z-10 backdrop-blur">
+    <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="index.html" class="text-xl font-bold tracking-wider uppercase text-white">Casavia</a>
+      <div class="flex items-center gap-6 text-sm font-medium text-zinc-300">
+        <a href="estudio.html" class="text-white border-b-2 border-emerald-500 py-5">Estudio de Grabación</a>
+        <a href="sala.html" class="hover:text-white transition">Sala de Ensayo</a>
+        <a href="index.html#contacto" class="hover:text-white transition">Contacto</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-6 py-12">
+    <header class="mb-12 border-b border-zinc-800 pb-8">
+      <div class="flex flex-wrap gap-2 mb-4">
+        <span id="badge-dias" class="px-3 py-1 text-xs font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full">
+          Cargando...
+        </span>
+        <span class="px-3 py-1 text-xs font-semibold uppercase tracking-wider bg-zinc-800 text-zinc-300 rounded-full">
+          Incluye asistente de montaje
+        </span>
+      </div>
+      <h1 id="titulo-estudio" class="text-4xl font-bold tracking-tight text-white">Estudio PISO3</h1>
+      <p id="nota-daw" class="text-zinc-400 mt-3 text-base leading-relaxed max-w-3xl"></p>
+    </header>
+
+    <div id="error-box" class="hidden mb-8 p-4 rounded-xl bg-red-950/50 border border-red-800 text-red-200 text-sm"></div>
+
+    <!-- Modalidad 1: Estudio + Sala de Batería -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold text-white mb-2">Estudio 3er Piso + Sala de Batería</h2>
+      <p class="text-sm text-zinc-400 mb-6">No incluye ingeniero de grabación (disponible como adicional). Incluye kit Tama Starclassic (sin platillos).</p>
+      <div id="grid-bateria" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div>
+    </section>
+
+    <!-- Modalidad 2: Estudio Voces e Instrumentos -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold text-white mb-2">Estudio 3er Piso (Voces e Instrumentos en General)</h2>
+      <p class="text-sm text-zinc-400 mb-6">Ideal para voces, cuerdas, overdubs, mezcla o producción sin uso de sala de batería.</p>
+      <div id="grid-voces" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div>
+    </section>
+
+    <!-- Adicionales (Ingeniero e Instrumentos) -->
+    <section class="mb-16">
+      <h2 class="text-xl font-semibold text-white mb-4">Servicios Adicionales</h2>
+      <div id="grid-adicionales" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+    </section>
+
+    <!-- Equipamiento, Backline e Instrumentos -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-semibold text-white mb-6">Equipamiento, Backline e Instrumentos</h2>
+      <div id="contenedor-equipamiento" class="space-y-10"></div>
+    </section>
+
+    <!-- Portafolio -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold text-white mb-6">Portafolio</h2>
+      <div id="grid-portafolio" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </section>
+  </main>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxKsL6XsBaeEAKQS-5O51su9bfsT5AT_qxb3cELO2DrGh-5ZA1iR7oP3WAbf9VKECnM/exec';
+
+    function renderCardTarifa(t) {
+      return `
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 flex flex-col justify-between">
+          <div>
+            <span class="text-xs font-medium uppercase tracking-wider text-emerald-400">${t.Duracion}</span>
+            <h3 class="text-xl font-semibold text-white mt-1">${t.Bloque}</h3>
+            <p class="text-zinc-300 text-sm mt-3">${t.Horario}</p>
+            <p class="text-zinc-400 text-xs mt-2">${t.Montaje}</p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-zinc-800 flex items-center justify-between">
+            <span class="text-2xl font-bold text-white">${t.Precio_CLP}</span>
+            <a href="https://wa.me/56992218032?text=${encodeURIComponent('Hola, quiero consultar por ' + t.Modalidad + ' - ' + t.Bloque)}"
+               target="_blank" rel="noopener"
+               class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-emerald-600 text-white transition">
+              Consultar
+            </a>
+          </div>
+        </div>
+      `;
+    }
+
+    async function cargarEstudio() {
+      const errorBox = document.getElementById('error-box');
+      try {
+        const res = await fetch(API_URL, { redirect: 'follow' });
+        const data = await res.json();
+        const est = data.estudio;
+
+        // Reglas
+        document.getElementById('titulo-estudio').textContent = est.reglas.nombre_estudio || 'Estudio PISO3';
+        document.getElementById('badge-dias').textContent = est.reglas.dias_operacion || 'Lunes a Sábado';
+        document.getElementById('nota-daw').textContent = est.reglas.nota_daw || '';
+
+        // Tarifas separadas por modalidad
+        const tarifasBat = est.tarifas.filter(t => t.Modalidad.includes('Sala de batería'));
+        const tarifasVoc = est.tarifas.filter(t => t.Modalidad.includes('Voces'));
+        const tarifasAdd = est.tarifas.filter(t => t.Modalidad === 'Adicionales');
+
+        document.getElementById('grid-bateria').innerHTML = tarifasBat.map(renderCardTarifa).join('');
+        document.getElementById('grid-voces').innerHTML = tarifasVoc.map(renderCardTarifa).join('');
+
+        document.getElementById('grid-adicionales').innerHTML = tarifasAdd.map(a => `
+          <div class="bg-zinc-900/70 border border-zinc-800 rounded-xl p-4 flex flex-col justify-between">
+            <div>
+              <h3 class="text-sm font-semibold text-white">${a.Bloque}</h3>
+              <p class="text-xs text-zinc-400 mt-1">${a.Horario}</p>
+            </div>
+            <p class="text-lg font-bold text-emerald-400 mt-4">+ ${a.Precio_CLP}</p>
+          </div>
+        `).join('');
+
+        // Equipamiento agrupado por Sección
+        const secciones = [...new Set(est.equipamiento.map(e => e.Seccion))];
+        document.getElementById('contenedor-equipamiento').innerHTML = secciones.map(sec => {
+          const items = est.equipamiento.filter(e => e.Seccion === sec);
+          return `
+            <div>
+              <h3 class="text-lg font-semibold text-emerald-400 border-b border-zinc-800 pb-2 mb-4">${sec}</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                ${items.map(eq => `
+                  <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-lg p-4">
+                    <span class="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">${eq.Categoria}</span>
+                    <h4 class="text-sm font-semibold text-white mt-0.5">${eq.Item}</h4>
+                    <p class="text-xs text-zinc-400 mt-1.5 leading-relaxed">${eq.Detalle}</p>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Portafolio
+        document.getElementById('grid-portafolio').innerHTML = est.portafolio.map(p => `
+          <a href="${p.URL}" target="_blank" rel="noopener"
+             class="bg-zinc-900 border border-zinc-800 hover:border-zinc-600 rounded-xl p-5 flex items-center justify-between transition">
+            <div>
+              <span class="text-xs font-semibold uppercase tracking-wider text-emerald-400">${p.Plataforma} • ${p.Rol}</span>
+              <h3 class="text-base font-bold text-white mt-1">${p.Artista} — ${p.Proyecto}</h3>
+            </div>
+            <span class="text-sm text-zinc-400 ml-4">Escuchar ↗</span>
+          </a>
+        `).join('');
+
+      } catch (err) {
+        errorBox.classList.remove('hidden');
+        errorBox.innerHTML = `<strong>Error cargando datos:</strong> ${err.message}`;
+      }
+    }
+
+    cargarEstudio();
+  </script>
+</body>
+</html>
